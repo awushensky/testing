@@ -1,0 +1,52 @@
+<html>
+<head>
+  <title>Testing device orientation</title>
+
+  <style>
+    .orientation-value {
+      border: 1px solid black;
+      width: 250px;
+    }
+  </style>
+</head>
+<body>
+
+<script type="text/javascript">
+  if (window.DeviceOrientationEvent) {
+    document.getElementById("orientation_supported").innerText = "true";
+    window.addEventListener("deviceorientation", function(eventData) {
+      var field_alpha = document.getElementById("orientation_alpha");
+      var field_beta = document.getElementById("orientation_gamma");
+      var field_gamma = document.getElementById("orientation_gamma");
+
+      field_alpha.innerText = eventData.alpha;
+      field_beta.innerText = eventData.beta;
+      field_gamma.innerText = eventData.gamma;
+    })
+  } else {
+    document.getElementById("orientation_supported").innerText = "false";
+  }
+</script>
+
+<div>
+  supported:
+  <div id="orientation_supported" class="orientation-value">...</div>
+</div>
+
+<div>
+  alpha:
+  <div id="orientation_alpha" class="orientation-value">&nbsp;</div>
+</div>
+
+<div>
+  beta:
+  <div id="orientation_beta" class="orientation-value">&nbsp;</div>
+</div>
+
+<div>
+  gamma:
+  <div id="orientation_gamma" class="orientation-value">&nbsp;</div>
+</div>
+
+</body>
+</html>
