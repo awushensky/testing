@@ -6,47 +6,129 @@
     .orientation-value {
       border: 1px solid black;
       width: 250px;
+      height: 20px;
+      margin-bottom: 10px;
+    }
+
+    .acceleration-value {
+      border: 1px solid black;
+      width: 150px;
+      height: 20px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
+
+<h1>Orientation</h1>
+<div>
+  <div>supported:</div>
+  <div id="orientation_supported" class="orientation-value">...</div>
+</div>
+
+<div>
+  <div>alpha:</div>
+  <div id="orientation_alpha" class="orientation-value">&nbsp;</div>
+</div>
+
+<div>
+  <div>beta:</div>
+  <div id="orientation_beta" class="orientation-value">&nbsp;</div>
+</div>
+
+<div>
+  <div>gamma:</div>
+  <div id="orientation_gamma" class="orientation-value">&nbsp;</div>
+</div>
+
+<h1>Acceleration</h1>
+<div>
+  <div>supported:</div>
+  <div id="motion_supported" class="acceleration-value">...</div>
+</div>
+
+<div>
+  <div>accel:</div>
+  <div id="acceleration_x" class="acceleration-value">&nbsp;</div>
+  <div id="acceleration_y" class="acceleration-value">&nbsp;</div>
+  <div id="acceleration_z" class="acceleration-value">&nbsp;</div>
+</div>
+
+<div>
+  <div>accel with grav:</div>
+  <div id="acceleration_grav_x" class="acceleration-value">&nbsp;</div>
+  <div id="acceleration_grav_y" class="acceleration-value">&nbsp;</div>
+  <div id="acceleration_grav_z" class="acceleration-value">&nbsp;</div>
+</div>
+
+<div>
+  <div>rotation:</div>
+  <div id="rotation_alpha" class="acceleration-value">&nbsp;</div>
+  <div id="rotation_beta" class="acceleration-value">&nbsp;</div>
+  <div id="rotation_gamma" class="acceleration-value">&nbsp;</div>
+</div>
+
+<div>
+  <div>interval:</div>
+  <div id="interval" class="acceleration-value">&nbsp;</div>
+</div>
 
 <script type="text/javascript">
   if (window.DeviceOrientationEvent) {
     document.getElementById("orientation_supported").innerText = "true";
     window.addEventListener("deviceorientation", function(eventData) {
       var field_alpha = document.getElementById("orientation_alpha");
-      var field_beta = document.getElementById("orientation_gamma");
+      var field_beta = document.getElementById("orientation_beta");
       var field_gamma = document.getElementById("orientation_gamma");
 
       field_alpha.innerText = eventData.alpha;
       field_beta.innerText = eventData.beta;
       field_gamma.innerText = eventData.gamma;
-    })
+    });
   } else {
     document.getElementById("orientation_supported").innerText = "false";
   }
+
+  if (window.DeviceMotionEvent) {
+    document.getElementById("motion_supported").innerText = "true";
+    window.addEventListener("devicemotion", function(eventData) {
+      var field_accel_x = document.getElementById("acceleration_x");
+      var field_accel_y = document.getElementById("acceleration_y");
+      var field_accel_z = document.getElementById("acceleration_z");
+
+      var field_rot_alpha = document.getElementById("rotation_alpha");
+      var field_rot_beta = document.getElementById("rotation_beta");
+      var field_rot_gamma = document.getElementById("rotation_gamma");
+
+      var field_accel_g_x = document.getElementById("acceleration_grav_x");
+      var field_accel_g_y = document.getElementById("acceleration_grav_y");
+      var field_accel_g_z = document.getElementById("acceleration_grav_z");
+
+      var field_interval = document.getElementById("interval");
+
+      var accel = eventData.acceleration;
+      var accel_g = eventData.accelerationIncludingGravity;
+      var rot = eventData.rotationRate;
+      var interval = eventData.interval;
+
+      field_accel_x.innerText = accel.x;
+      field_accel_y.innerText = accel.y;
+      field_accel_z.innerText = accel.z;
+
+      field_rot_alpha.innerText = rot.alpha;
+      field_rot_beta.innerText = rot.beta;
+      field_rot_gamma.innerText = rot.gamma;
+
+      field_accel_g_x.innerText = accel_g.x;
+      field_accel_g_y.innerText = accel_g.y;
+      field_accel_g_z.innerText = accel_g.z;
+
+      field_interval.innerText = interval;
+    });
+  } else {
+    document.getElementById("motion_supported").innerText = "false";
+  }
 </script>
-
-<div>
-  supported:
-  <div id="orientation_supported" class="orientation-value">...</div>
-</div>
-
-<div>
-  alpha:
-  <div id="orientation_alpha" class="orientation-value">&nbsp;</div>
-</div>
-
-<div>
-  beta:
-  <div id="orientation_beta" class="orientation-value">&nbsp;</div>
-</div>
-
-<div>
-  gamma:
-  <div id="orientation_gamma" class="orientation-value">&nbsp;</div>
-</div>
 
 </body>
 </html>
