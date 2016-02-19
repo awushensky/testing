@@ -1,0 +1,18 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <div id="string"></div>
+    <div id="base64"></div>
+    <div id="result"></div>
+
+    <script type="text/javascript">
+      var obj = {'a':1,'b':2};
+      var json = JSON.stringify(obj);
+      var base64 = btoa(json);
+      document.getElementById("string").innerText = json;
+      document.getElementById("base64").innerText = base64;
+      document.getElementById("result").innerText = atob(base64);
+    </script>
+  </body>
+</html>
