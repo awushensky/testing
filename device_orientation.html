@@ -10,6 +10,13 @@
       margin-bottom: 10px;
     }
 
+    .orientation-output {
+      border: 1px solid black;
+      width: 1024px;
+      height: 1024px;
+      margin-bottom: 10px;
+    }
+
     .acceleration-value {
       border: 1px solid black;
       width: 150px;
@@ -39,6 +46,11 @@
 <div>
   <div>gamma:</div>
   <div id="orientation_gamma" class="orientation-value">&nbsp;</div>
+</div>
+
+<div>
+  <div>output</div>
+  <div id="orientation_output" class="orientation-output">&nbsp;</div>
 </div>
 
 <h1>Acceleration</h1>
@@ -74,16 +86,59 @@
 </div>
 
 <script type="text/javascript">
+  var metrics = [];
+
   if (window.DeviceOrientationEvent) {
+    var lastOrientation = {
+      'a':0,
+      'b':0,
+      'g':0,
+      't':0
+    };
+
     document.getElementById("orientation_supported").innerText = "true";
-    window.addEventListener("deviceorientation", function(eventData) {
+    window.addEventListener("deviceorientation", function(orientation) {
       var field_alpha = document.getElementById("orientation_alpha");
       var field_beta = document.getElementById("orientation_beta");
       var field_gamma = document.getElementById("orientation_gamma");
+      var field_output = document.getElementById("orientation_output");
 
-      field_alpha.innerText = eventData.alpha;
-      field_beta.innerText = eventData.beta;
-      field_gamma.innerText = eventData.gamma;
+      var update = false;
+      var time = new Date().getTime();
+
+      if (Math.abs(orientation.alpha - lastOrientation.a) > 0) {
+        lastOrientation.a = orientation.alpha;
+        update = true;
+      }
+
+      if (Math.abs(orientation.beta - lastOrientation.b) > 0) {
+        lastOrientation.b = orientation.beta;
+        update = true;
+      }
+
+      if (Math.abs(orientation.gamma - lastOrientation.g) > 0) {
+        lastOrientation.g = orientation.gamma;
+        update = true;
+      }
+
+      if (Math.abs(time - lastOrientation.t) > 1000) {
+        update = true;
+      }
+
+      if (update) {
+        metrics.push({
+          'a':orientation.alpha,
+          'b':orientation.beta,
+          'g':orientation.gamma,
+          't':time
+        });
+
+        field_output.innerText = metrics.length;
+      }
+
+      field_alpha.innerText = orientation.alpha;
+      field_beta.innerText = orientation.beta;
+      field_gamma.innerText = orientation.gamma;
     });
   } else {
     document.getElementById("orientation_supported").innerText = "false";
