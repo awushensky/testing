@@ -90,6 +90,20 @@
   }
 
   if (window.DeviceMotionEvent) {
+    var accel_threshold = 0.11;
+    var rot_threshold = 0.05;
+
+    var last_accel_x = 0;
+    var last_accel_y = 0;
+    var last_accel_z = 0;
+
+    var last_accel_g_x = 0;
+    var last_accel_g_y = 0;
+    var last_accel_g_z = 0;
+
+    var last_rot_alpha = 0;
+    var last_rot_beta = 0;
+
     document.getElementById("motion_supported").innerText = "true";
     window.addEventListener("devicemotion", function(eventData) {
       var field_accel_x = document.getElementById("acceleration_x");
@@ -111,17 +125,50 @@
       var rot = eventData.rotationRate;
       var interval = eventData.interval;
 
-      field_accel_x.innerText = accel.x;
-      field_accel_y.innerText = accel.y;
-      field_accel_z.innerText = accel.z;
+      if (abs(accel.x - last_accel_x) < accel_threshold) {
+        last_accel_x = accel.x;
+        field_accel_x.innerText = accel.x;
+      }
 
-      field_rot_alpha.innerText = rot.alpha;
-      field_rot_beta.innerText = rot.beta;
-      field_rot_gamma.innerText = rot.gamma;
+      if (abs(accel.y - last_accel_y) < accel_threshold) {
+        last_accel_y = accel.y;
+        field_accel_y.innerText = accel.y;
+      }
 
-      field_accel_g_x.innerText = accel_g.x;
-      field_accel_g_y.innerText = accel_g.y;
-      field_accel_g_z.innerText = accel_g.z;
+      if (abs(accel.z - last_accel_z) < accel_threshold) {
+        last_accel_z = accel.z;
+        field_accel_z.innerText = accel.z;
+      }
+
+      if (abs(rot.alpha - last_rot_alpha) < rot_threshold) {
+        last_rot_alpha = rot.alpha;
+        field_rot_alpha.innerText = rot.alpha;
+      }
+
+      if (abs(rot.beta - last_rot_beta) < rot_threshold) {
+        last_rot_beta = rot.beta;
+        field_rot_beta.innerText = rot.beta;
+      }
+
+      if (abs(rot.gamma - last_rot_gamma) < rot_threshold) {
+        last_rot_gamma = rot.gamma;
+        field_rot_gamma.innerText = rot.gamma;
+      }
+
+      if (abs(accel_g.x - last_accel_g_x) < accel_threshold) {
+        last_accel_g_x = accel_g.x;
+        field_accel_g_x.innerText = accel_g.x;
+      }
+
+      if (abs(accel_g.y - last_accel_g_y) < accel_threshold) {
+        last_accel_g_y = accel_g.y;
+        field_accel_g_y.innerText = accel_g.y;
+      }
+
+      if (abs(accel_g.z - last_accel_g_z) < accel_threshold) {
+        last_accel_g_z = accel_g.z;
+        field_accel_g_z.innerText = accel_g.z;
+      }
 
       field_interval.innerText = interval;
     });
