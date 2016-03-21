@@ -143,7 +143,7 @@
       };
 
       orientation_delta =
-        Math.max(alpha - lastOrientation.alpha, beta - lastOrientation.beta, gamma - lastOrientation.gamma, orientation_delta);
+        Math.max(Math.abs(alpha - lastOrientation.a), Math.abs(beta - lastOrientation.b), Math.abs(gamma - lastOrientation.g), orientation_delta);
 
       field_output.innerText += eventToBytes(orientation, time);
 
@@ -191,8 +191,8 @@
       var rot = eventData.rotationRate;
       var interval = eventData.interval;
 
-      accel_delta = Math.max(accel.x - last_accel.x, accel.y - last_accel.y, accel.z - last_accel.z, rot_delta);
-      rot_delta = Math.max(rot.alpha - last_rotation.a, rot.beta - last_rotation.b, rot.gamma - last_rotation.g, rot_delta);
+      accel_delta = Math.max(Math.abs(accel.x - last_accel.x), Math.abs(accel.y - last_accel.y), Math.abs(accel.z - last_accel.z), rot_delta);
+      rot_delta = Math.max(Math.abs(rot.alpha - last_rotation.a), Math.abs(rot.beta - last_rotation.b), Math.abs(rot.gamma - last_rotation.g), rot_delta);
 
       field_accel_x.innerText = accel.x;
       field_accel_y.innerText = accel.y;
