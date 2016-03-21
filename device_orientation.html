@@ -210,7 +210,7 @@
       var gamma = rot.gamma * 100 | 0;
 
       if (hasMoved) {
-        accel_delta = Math.max(Math.abs(x - last_accel.x), Math.abs(y - last_accel.y), Math.abs(z - last_accel.z), rot_delta);
+        accel_delta = Math.max(Math.abs(x - last_accel.x), Math.abs(y - last_accel.y), Math.abs(z - last_accel.z), accel_delta);
       }
 
       if (hasMoved) {
