@@ -119,6 +119,8 @@
     };
     var orientation_delta = 0;
 
+    var gotOrientation = false;
+
     document.getElementById("orientation_supported").innerText = "true";
     window.addEventListener("deviceorientation", function(orientation) {
       var field_alpha = document.getElementById("orientation_alpha");
@@ -134,8 +136,13 @@
       var beta = orientation.beta * 100 | 0;
       var gamma = orientation.gamma * 100 | 0;
 
-      orientation_delta =
-        Math.max(Math.abs(alpha - lastOrientation.a), Math.abs(beta - lastOrientation.b), Math.abs(gamma - lastOrientation.g), orientation_delta);
+      if (gotOrientation) {
+        orientation_delta = Math.max(
+          Math.abs(alpha - lastOrientation.a),
+          Math.abs(beta - lastOrientation.b),
+          Math.abs(gamma - lastOrientation.g),
+          orientation_delta);
+      }
 
       //keep track of the last orientation for delta calculation.
       lastOrientation = {
@@ -144,6 +151,8 @@
         'g': gamma,
         't': time
       };
+
+      gotOrientation = true;
 
       field_output.innerText += eventToBytes(orientation, time);
 
@@ -172,6 +181,7 @@
     };
 
     var rot_delta = 0;
+    var hasMoved = false;
 
     document.getElementById("motion_supported").innerText = "true";
     window.addEventListener("devicemotion", function(eventData) {
@@ -199,8 +209,13 @@
       var beta = rot.beta * 100 | 0;
       var gamma = rot.gamma * 100 | 0;
 
-      accel_delta = Math.max(Math.abs(accel.x - last_accel.x), Math.abs(accel.y - last_accel.y), Math.abs(accel.z - last_accel.z), rot_delta);
-      rot_delta = Math.max(Math.abs(rot.alpha - last_rotation.a), Math.abs(rot.beta - last_rotation.b), Math.abs(rot.gamma - last_rotation.g), rot_delta);
+      if (hasMoved) {
+        accel_delta = Math.max(Math.abs(x - last_accel.x), Math.abs(y - last_accel.y), Math.abs(z - last_accel.z), rot_delta);
+      }
+
+      if (hasMoved) {
+        rot_delta = Math.max(Math.abs(alpha - last_rotation.a), Math.abs(beta - last_rotation.b), Math.abs(gamma - last_rotation.g), rot_delta);
+      }
 
       last_accel = {
         'x': x,
@@ -213,6 +228,8 @@
         'b': beta,
         'g': gamma
       };
+
+      hasMoved = true;
 
       field_accel_x.innerText = accel.x;
       field_accel_y.innerText = accel.y;
