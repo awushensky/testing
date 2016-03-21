@@ -13,7 +13,7 @@
     .orientation-output {
       border: 1px solid black;
       width: 1024px;
-      height: 1024px;
+      height: 256px;
       margin-bottom: 10px;
     }
 
@@ -49,6 +49,11 @@
 </div>
 
 <div>
+  <div>delta:</div>
+  <div id="orientation_delta" class="orientation-value">&nbsp;</div>
+</div>
+
+<div>
   <div>output</div>
   <div id="orientation_output" class="orientation-output">&nbsp;</div>
 </div>
@@ -64,13 +69,7 @@
   <div id="acceleration_x" class="acceleration-value">&nbsp;</div>
   <div id="acceleration_y" class="acceleration-value">&nbsp;</div>
   <div id="acceleration_z" class="acceleration-value">&nbsp;</div>
-</div>
-
-<div>
-  <div>accel with grav:</div>
-  <div id="acceleration_grav_x" class="acceleration-value">&nbsp;</div>
-  <div id="acceleration_grav_y" class="acceleration-value">&nbsp;</div>
-  <div id="acceleration_grav_z" class="acceleration-value">&nbsp;</div>
+  <div id="acceleration_delta" class="acceleration-value">&nbsp;</div>
 </div>
 
 <div>
@@ -78,6 +77,7 @@
   <div id="rotation_alpha" class="acceleration-value">&nbsp;</div>
   <div id="rotation_beta" class="acceleration-value">&nbsp;</div>
   <div id="rotation_gamma" class="acceleration-value">&nbsp;</div>
+  <div id="rotation_delta" class="acceleration-value">&nbsp;</div>
 </div>
 
 <div>
@@ -86,7 +86,29 @@
 </div>
 
 <script type="text/javascript">
-  var metrics = [];
+  var startTime = new Date().getTime();
+
+  // To represent 359.99 possible degrees, we need 16 bits.
+  var rotationBitmask = 0xFF;
+
+  function eventToBytes(orientation, time) {
+    var alpha = orientation.a * 100 | 0;
+    var beta = orientation.b * 100 | 0;
+    var gamma = orientation.g * 100 | 0;
+    var timeByte0 = time % 256;
+    var timeByte1 = (time / 256) % 256;
+    var timeByte2 = (time / 65536) % 256;
+    var timeByte3 = (time / 16777216) % 256;
+
+    return String.fromCharCode(
+      alpha & rotationBitmask,
+      alpha >> 8 & rotationBitmask,
+      beta & rotationBitmask,
+      beta >> 8 & rotationBitmask,
+      gamma & rotationBitmask,
+      gamma >> 8 & rotationBitmask,
+      timeByte0, timeByte1, timeByte2, timeByte3);
+  }
 
   if (window.DeviceOrientationEvent) {
     var lastOrientation = {
@@ -95,136 +117,92 @@
       'g':0,
       't':0
     };
+    var orientation_delta = 0;
 
     document.getElementById("orientation_supported").innerText = "true";
     window.addEventListener("deviceorientation", function(orientation) {
       var field_alpha = document.getElementById("orientation_alpha");
       var field_beta = document.getElementById("orientation_beta");
       var field_gamma = document.getElementById("orientation_gamma");
+      var field_delta = document.getElementById("orientation_delta");
       var field_output = document.getElementById("orientation_output");
 
-      var update = false;
-      var time = new Date().getTime();
+      var time = new Date().getTime() - startTime;
 
-      if (Math.abs(orientation.alpha - lastOrientation.a) > 0) {
-        lastOrientation.a = orientation.alpha;
-        update = true;
-      }
+      //fastest way to truncate to two decimal places. see http://jsperf.com/testing-user-metrics-gathering/2
+      var alpha = orientation.alpha * 100 | 0;
+      var beta = orientation.beta * 100 | 0;
+      var gamma = orientation.gamma * 100 | 0;
 
-      if (Math.abs(orientation.beta - lastOrientation.b) > 0) {
-        lastOrientation.b = orientation.beta;
-        update = true;
-      }
+      //keep track of the last orientation for delta calculation.
+      lastOrientation = {
+        'a': alpha,
+        'b': beta,
+        'g': gamma,
+        't': time
+      };
 
-      if (Math.abs(orientation.gamma - lastOrientation.g) > 0) {
-        lastOrientation.g = orientation.gamma;
-        update = true;
-      }
+      orientation_delta =
+        Math.max(alpha - lastOrientation.alpha, beta - lastOrientation.beta, gamma - lastOrientation.gamma, orientation_delta);
 
-      if (Math.abs(time - lastOrientation.t) > 1000) {
-        update = true;
-      }
-
-      if (update) {
-        metrics.push({
-          'a':orientation.alpha,
-          'b':orientation.beta,
-          'g':orientation.gamma,
-          't':time
-        });
-
-        field_output.innerText = metrics.length;
-      }
+      field_output.innerText += eventToBytes(orientation, time);
 
       field_alpha.innerText = orientation.alpha;
       field_beta.innerText = orientation.beta;
       field_gamma.innerText = orientation.gamma;
+      field_delta.innerText = orientation_delta;
     });
   } else {
     document.getElementById("orientation_supported").innerText = "false";
   }
 
   if (window.DeviceMotionEvent) {
-    var accel_threshold = 0.11;
-    var rot_threshold = 0.05;
+    var last_accel = {
+      'x': 0,
+      'y': 0,
+      'z': 0
+    };
 
-    var last_accel_x = 0;
-    var last_accel_y = 0;
-    var last_accel_z = 0;
+    var accel_delta = 0;
 
-    var last_accel_g_x = 0;
-    var last_accel_g_y = 0;
-    var last_accel_g_z = 0;
+    var last_rotation = {
+      'a': 0,
+      'b': 0,
+      'g': 0
+    };
 
-    var last_rot_alpha = 0;
-    var last_rot_beta = 0;
-    var last_rot_gamma = 0;
+    var rot_delta = 0;
 
     document.getElementById("motion_supported").innerText = "true";
     window.addEventListener("devicemotion", function(eventData) {
       var field_accel_x = document.getElementById("acceleration_x");
       var field_accel_y = document.getElementById("acceleration_y");
       var field_accel_z = document.getElementById("acceleration_z");
+      var field_accel_delta = document.getElementById("acceleration_delta");
 
       var field_rot_alpha = document.getElementById("rotation_alpha");
       var field_rot_beta = document.getElementById("rotation_beta");
       var field_rot_gamma = document.getElementById("rotation_gamma");
-
-      var field_accel_g_x = document.getElementById("acceleration_grav_x");
-      var field_accel_g_y = document.getElementById("acceleration_grav_y");
-      var field_accel_g_z = document.getElementById("acceleration_grav_z");
+      var field_rot_delta = document.getElementById("rotation_delta");
 
       var field_interval = document.getElementById("interval");
 
-      var accel = eventData.acceleration;
-      var accel_g = eventData.accelerationIncludingGravity;
+      var accel = eventData.accelerationIncludingGravity;
       var rot = eventData.rotationRate;
       var interval = eventData.interval;
 
-      if (Math.abs(accel.x - last_accel_x) > accel_threshold) {
-        last_accel_x = accel.x;
-        field_accel_x.innerText = accel.x;
-      }
+      accel_delta = Math.max(accel.x - last_accel.x, accel.y - last_accel.y, accel.z - last_accel.z, rot_delta);
+      rot_delta = Math.max(rot.alpha - last_rotation.a, rot.beta - last_rotation.b, rot.gamma - last_rotation.g, rot_delta);
 
-      if (Math.abs(accel.y - last_accel_y) > accel_threshold) {
-        last_accel_y = accel.y;
-        field_accel_y.innerText = accel.y;
-      }
+      field_accel_x.innerText = accel.x;
+      field_accel_y.innerText = accel.y;
+      field_accel_z.innerText = accel.z;
+      field_accel_delta.innerText = accel_delta;
 
-      if (Math.abs(accel.z - last_accel_z) > accel_threshold) {
-        last_accel_z = accel.z;
-        field_accel_z.innerText = accel.z;
-      }
-
-      if (Math.abs(rot.alpha - last_rot_alpha) > rot_threshold) {
-        last_rot_alpha = rot.alpha;
-        field_rot_alpha.innerText = rot.alpha;
-      }
-
-      if (Math.abs(rot.beta - last_rot_beta) > rot_threshold) {
-        last_rot_beta = rot.beta;
-        field_rot_beta.innerText = rot.beta;
-      }
-
-      if (Math.abs(rot.gamma - last_rot_gamma) > rot_threshold) {
-        last_rot_gamma = rot.gamma;
-        field_rot_gamma.innerText = rot.gamma;
-      }
-
-      if (Math.abs(accel_g.x - last_accel_g_x) > accel_threshold) {
-        last_accel_g_x = accel_g.x;
-        field_accel_g_x.innerText = accel_g.x;
-      }
-
-      if (Math.abs(accel_g.y - last_accel_g_y) > accel_threshold) {
-        last_accel_g_y = accel_g.y;
-        field_accel_g_y.innerText = accel_g.y;
-      }
-
-      if (Math.abs(accel_g.z - last_accel_g_z) > accel_threshold) {
-        last_accel_g_z = accel_g.z;
-        field_accel_g_z.innerText = accel_g.z;
-      }
+      field_rot_alpha.innerText = rot.alpha;
+      field_rot_beta.innerText = rot.beta;
+      field_rot_gamma.innerText = rot.gamma;
+      field_rot_delta.innerText = rot_delta;
 
       field_interval.innerText = interval;
     });

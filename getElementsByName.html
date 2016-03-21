@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>getElementsByName</title>
+  </head>
+  <body>
+    <form>
+      <input type="text" id="input1" name="something">
+      <input type="text" id="input2" name="something">
+    </form>
+
+    <script type="text/javascript">
+      // var inputs = Array.prototype.slice.call(document.getElementsByName('something'));
+      var inputs = document.getElementsByName('something');
+      // alert(typeof(inputs));
+      // inputs.forEach(function(input) { input.value = 'it\'s working!'});
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].value = 'test';
+      }
+    </script>
+  </body>
+</html>
