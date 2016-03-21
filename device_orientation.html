@@ -134,6 +134,9 @@
       var beta = orientation.beta * 100 | 0;
       var gamma = orientation.gamma * 100 | 0;
 
+      orientation_delta =
+        Math.max(Math.abs(alpha - lastOrientation.a), Math.abs(beta - lastOrientation.b), Math.abs(gamma - lastOrientation.g), orientation_delta);
+
       //keep track of the last orientation for delta calculation.
       lastOrientation = {
         'a': alpha,
@@ -141,9 +144,6 @@
         'g': gamma,
         't': time
       };
-
-      orientation_delta =
-        Math.max(Math.abs(alpha - lastOrientation.a), Math.abs(beta - lastOrientation.b), Math.abs(gamma - lastOrientation.g), orientation_delta);
 
       field_output.innerText += eventToBytes(orientation, time);
 
@@ -191,8 +191,28 @@
       var rot = eventData.rotationRate;
       var interval = eventData.interval;
 
+      var x = accel.x * 100 | 0;
+      var y = accel.y * 100 | 0;
+      var z = accel.z * 100 | 0;
+
+      var alpha = rot.alpha * 100 | 0;
+      var beta = rot.beta * 100 | 0;
+      var gamma = rot.gamma * 100 | 0;
+
       accel_delta = Math.max(Math.abs(accel.x - last_accel.x), Math.abs(accel.y - last_accel.y), Math.abs(accel.z - last_accel.z), rot_delta);
       rot_delta = Math.max(Math.abs(rot.alpha - last_rotation.a), Math.abs(rot.beta - last_rotation.b), Math.abs(rot.gamma - last_rotation.g), rot_delta);
+
+      last_accel = {
+        'x': x,
+        'y': y,
+        'z': z
+      };
+
+      last_rotation = {
+        'a': alpha,
+        'b': beta,
+        'g': gamma
+      };
 
       field_accel_x.innerText = accel.x;
       field_accel_y.innerText = accel.y;
