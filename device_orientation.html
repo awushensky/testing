@@ -86,6 +86,24 @@
 </div>
 
 <script type="text/javascript">
+  var field_orientation_alpha = document.getElementById("orientation_alpha");
+  var field_orientation_beta = document.getElementById("orientation_beta");
+  var field_orientation_gamma = document.getElementById("orientation_gamma");
+  var field_orientation_delta = document.getElementById("orientation_delta");
+  var field_orientation_output = document.getElementById("orientation_output");
+
+  var field_accel_x = document.getElementById("acceleration_x");
+  var field_accel_y = document.getElementById("acceleration_y");
+  var field_accel_z = document.getElementById("acceleration_z");
+  var field_accel_delta = document.getElementById("acceleration_delta");
+
+  var field_rot_alpha = document.getElementById("rotation_alpha");
+  var field_rot_beta = document.getElementById("rotation_beta");
+  var field_rot_gamma = document.getElementById("rotation_gamma");
+  var field_rot_delta = document.getElementById("rotation_delta");
+
+  var field_interval = document.getElementById("interval");
+
   var startTime = new Date().getTime();
 
   // To represent 359.99 possible degrees, we need 16 bits.
@@ -100,14 +118,18 @@
     var timeByte2 = (time / 65536) % 256;
     var timeByte3 = (time / 16777216) % 256;
 
-    return String.fromCharCode(
+    return btoa(String.fromCharCode(
       alpha & rotationBitmask,
       alpha >> 8 & rotationBitmask,
       beta & rotationBitmask,
       beta >> 8 & rotationBitmask,
       gamma & rotationBitmask,
       gamma >> 8 & rotationBitmask,
-      timeByte0, timeByte1, timeByte2, timeByte3);
+      timeByte0,
+      timeByte1,
+      timeByte2));
+      // timeByte2,
+      // timeByte3));
   }
 
   if (window.DeviceOrientationEvent) {
@@ -123,11 +145,6 @@
 
     document.getElementById("orientation_supported").innerText = "true";
     window.addEventListener("deviceorientation", function(orientation) {
-      var field_alpha = document.getElementById("orientation_alpha");
-      var field_beta = document.getElementById("orientation_beta");
-      var field_gamma = document.getElementById("orientation_gamma");
-      var field_delta = document.getElementById("orientation_delta");
-      var field_output = document.getElementById("orientation_output");
 
       var time = new Date().getTime() - startTime;
 
@@ -154,12 +171,12 @@
 
       gotOrientation = true;
 
-      field_output.innerText += eventToBytes(orientation, time);
+      field_orientation_output.innerText += eventToBytes(orientation, time);
 
-      field_alpha.innerText = orientation.alpha;
-      field_beta.innerText = orientation.beta;
-      field_gamma.innerText = orientation.gamma;
-      field_delta.innerText = orientation_delta;
+      field_orientation_alpha.innerText = orientation.alpha;
+      field_orientation_beta.innerText = orientation.beta;
+      field_orientation_gamma.innerText = orientation.gamma;
+      field_orientation_delta.innerText = orientation_delta;
     });
   } else {
     document.getElementById("orientation_supported").innerText = "false";
@@ -185,18 +202,6 @@
 
     document.getElementById("motion_supported").innerText = "true";
     window.addEventListener("devicemotion", function(eventData) {
-      var field_accel_x = document.getElementById("acceleration_x");
-      var field_accel_y = document.getElementById("acceleration_y");
-      var field_accel_z = document.getElementById("acceleration_z");
-      var field_accel_delta = document.getElementById("acceleration_delta");
-
-      var field_rot_alpha = document.getElementById("rotation_alpha");
-      var field_rot_beta = document.getElementById("rotation_beta");
-      var field_rot_gamma = document.getElementById("rotation_gamma");
-      var field_rot_delta = document.getElementById("rotation_delta");
-
-      var field_interval = document.getElementById("interval");
-
       var accel = eventData.accelerationIncludingGravity;
       var rot = eventData.rotationRate;
       var interval = eventData.interval;
@@ -210,11 +215,19 @@
       var gamma = rot.gamma * 100 | 0;
 
       if (hasMoved) {
-        accel_delta = Math.max(Math.abs(x - last_accel.x), Math.abs(y - last_accel.y), Math.abs(z - last_accel.z), accel_delta);
+        accel_delta = Math.max(
+          Math.abs(x - last_accel.x),
+          Math.abs(y - last_accel.y),
+          Math.abs(z - last_accel.z),
+          accel_delta);
       }
 
       if (hasMoved) {
-        rot_delta = Math.max(Math.abs(alpha - last_rotation.a), Math.abs(beta - last_rotation.b), Math.abs(gamma - last_rotation.g), rot_delta);
+        rot_delta = Math.max(
+          Math.abs(alpha - last_rotation.a),
+          Math.abs(beta - last_rotation.b),
+          Math.abs(gamma - last_rotation.g),
+          rot_delta);
       }
 
       last_accel = {
